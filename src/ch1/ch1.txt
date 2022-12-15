@@ -1,0 +1,67 @@
+// altering data 
+begin;
+
+alter table factbook 
+	alter shares 
+		type bigint 
+	using replace(shares, ',', '')::bigint,
+		
+	alter trades 
+		type bigint 
+	using replace(trades, ',', '')::bigint,
+	
+	alter dollars 
+		type bigint 
+	using substring(replace(dollars, ',', '') from 2)::numeric;
+
+commit;
+
+// using \set 
+postgres=# \set start '2010-03-01';
+postgres=# select * from factbook where date >= date:'start';
+// decorated literal expression
+postgres=# select :'start';
+postgres=# select date, to_char(shares, '99G999G999G999') as shares, to_char(trades,'99G999G999') as trades, to_char(dollars, 'L99G999G999G999') as dollars from factbook where date >= date :'start';
+// include filter for an interval of only 1 month
+postgres=# select date, to_char(shares, '99G999G999G999') as shares, to_char(trades,'99G999G999') as trades, to_char(dollars, 'L99G999G999G999') as dollars from factbook where date >= date :'start' and date < date:'start' + interval '1 month';
+
+
+// define a prepared statement 
+postgres=# prepare foo as
+postgres-# select date, shares, trades, dollars
+postgres-# from factbook
+postgres-# where date >= $1::date
+postgres-# and date < $1::date + interval '1 month'
+postgres-# order by date;
+
+// execute prepared statement 
+postgres=#execute foo('2010-03-01');
+
+// show data for each day of month April 2010 using only sql 
+select cast(calendar.entry as date) as date,
+	to_char(coalesce(shares, 0), 'G999G999G999G999') as shares,
+	coalesce(trades, 0) as trades,
+	to_char(coalesce(dollars, 0), 'L99G999G999G999') as dollars 
+from /*
+	  * Generate the target month's calendar then LEFT JOIN each day
+	  * against the factbook dataset
+	  */
+	  generate_series(date '20100401', 
+					  date '20100401' + interval '1 month' - interval '1 day',
+					 interval '1 day') as calendar(entry)
+	 left join factbook 
+	 	on factbook.date = calendar.entry;
+
+// or 
+select cast(calendar.entry as date) as date,
+	coalesce(shares, 0) as shares,
+	coalesce(trades, 0) as trades,
+	to_char(coalesce(dollars, 0), 'L99G999G999') as dollars 
+from generate_series(date '2010-03-01', 
+		cast('2010-03-01' as date) + interval '1 month' - interval '1 day',
+		interval '1 day') as calendar(entry)
+	left join factbook 
+	on factbook.date = calendar.entry;
+
+
+

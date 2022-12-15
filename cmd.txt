@@ -1,0 +1,23 @@
+To login to psql:
+>psql -U postgres
+
+// copy data from csv file to table 
+postgres=# \copy factbook from './factbook2.csv' with delimiter E',' null '';
+
+// when columns in csv files are separated using semicolons
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
