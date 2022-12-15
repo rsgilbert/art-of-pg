@@ -6,8 +6,14 @@ postgres=# \copy factbook from './factbook2.csv' with delimiter E',' null '';
 
 // when columns in csv files are separated using semicolons
 
+// create chinook db and restore from dump 
+postgres=# create database chinook;
 
+// restore db 
+pg_restore -v -d postgresql://postgres:stanislav100@localhost:5432 --create ./chinook_db.dump
 
+// access db using psql 
+psql postgresql://postgres:stanislav100@localhost:5432/chinook
 
 
 

@@ -64,4 +64,29 @@ from generate_series(date '2010-03-01',
 	on factbook.date = calendar.entry;
 
 
+// computing weekly changes 
+with computed_data as 
+(
+	select cast(date as date) as date,
+		to_char(date, 'Dy') as day,
+		coalesce(dollars, 0) as dollars,
+		lag(dollars, 1) 
+			over(partition by extract('isodow' from date) order by date)
+			as last_week_dollars
+	from /* Generate the month calendar plus a week before
+		 * so we have values to compare dollars against 
+		*/
+		generate_series(date '2010-03-01' - interval '1 week',
+					   date '2010-03-01' + interval '1 month' - interval '1 day',
+					   interval '1 day') as calendar(date)
+		left join factbook using(date)
+)
+select date, day, dollars, last_week_dollars, 
+	case when dollars is not null and dollars <> 0 
+		then round(100 * (dollars - last_week_dollars) / dollars, 2) end 
+		as "WoW %"
+from computed_data
 
+
+// query postgres server version 
+show server_version;
