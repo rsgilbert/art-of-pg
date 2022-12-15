@@ -7,7 +7,7 @@ import psycopg2.extras
 import sys 
 
 DEBUGSQL = False 
-PGCONNSTRING = "user=postgres password=stanislav100 dbname=chinook application_name=c"
+PGCONNSTRING = "user=postgres password=stanislav100 dbname=chinook"
 
 class Model(object):
     tablename = None 
@@ -93,3 +93,4 @@ if __name__ == '__main__':
         duration = timedelta(milliseconds=ms)
         print("%25s: %s" % (album.title, duration))
     
+   

@@ -1,0 +1,25 @@
+
+// find out definition of a table such as the track table 
+\d track
+
+
+// connect to a particular db using psql 
+psql chinook -U postgres
+
+// find list of relations/tables 
+\dt 
+
+// count of all tracks by genre 
+chinook=# select genre.name, count(*) as cnt                               
+from genre left join track using(genreid)                                  
+group by genre.name order by cnt desc;
+
+// execute sql script from psql shell 
+psql -U postgres chinook
+chinook=# \set n 1 
+chinook=# \i ./ch4/artist.sql 
+
+
+
+
+

@@ -24,11 +24,87 @@ select album.albumid, album.title as albumtitle,
 inner join artist using (artistid)
 where artist.name = 'Red Hot Chili Peppers';
 
+// define and use stored procedure 
+create or replace function get_all_albums
+(
+	in artistid bigint,
+	out album text,
+	out duration interval
+)
+returns setof record 
+language sql 
+as $$
+	select album.title as album,sum(milliseconds) * interval '1 ms' as duration 
+	from album join artist using(artistid)
+	left join track using (albumid)
+	where artist.artistid = get_all_albums.artistid
+	group by album 
+	order by album
+$$;
+
+-- select * from get_all_albums(101);
+select * from get_all_albums(
+	(select artistid from artist where name = 'Red Hot Chili Peppers')
+)
 
 
+// using lateral 
+// query artists and information about their albums 
+select artist.artistid, artist."name" as artistname, album, duration 
+from artist, lateral get_all_albums(artistid)
 
 
+// list albums and their durations for artist who have only 4 albums 
+with four_albums as 
+(
+	  select artistid, count(artistid)
+		from album 
+	group by artistid 
+	  having count(artistid) = 4
+)
+    select * 
+      from four_albums 
+inner join artist
+     using (artistid),
+   lateral get_all_albums(artist.artistid)
 
 
+// define a function using a loop 
+// this time the loop runs on the database server instead of application code so no network round trips 
+// Notice that the language used is plpgsql 
+create or replace function get_all_albums_v2
+(
+	in name text,
+	out album text,
+	out duration interval
+)
+returns setof record 
+language plpgsql
+as $$
+declare 
+	rec record;
+begin
+	/** Go through all albums */
+	for rec in select albumid 
+				from album 
+				join artist 
+				using (artistid)
+				where artist.name = get_all_albums_v2.name
+	loop 
+		/** For each album, find out the title of the album 
+		* and the total duration of all tracks in that album.
+		* These two values will be returned as a row in the function's result table */
+		select title, sum(milliseconds) * interval '1ms' 
+		into album, duration
+		from album 
+		left join track using(albumid)
+		where albumid = rec.albumid
+		group by title 
+		order by title;
+		return next;
+	end loop;
+end;
+$$;
 
+select * from get_all_albums_v2('Red Hot Chili Peppers');
 
