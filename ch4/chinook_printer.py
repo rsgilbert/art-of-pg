@@ -5,6 +5,7 @@ import sys
 
 PGCONNSTRING = "user=postgres password=stanislav100 dbname=chinook"
 
+
 class chinook(object):
     """Our database model and queries"""
     def __init__(self):
