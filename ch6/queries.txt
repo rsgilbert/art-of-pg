@@ -1,0 +1,22 @@
+// run query from cli 
+psql --tuples-only -f customers.sql -U postgres  -d chinook
+
+// create html file with result 
+psql --tuples-only -f customers.sql -U postgres  -d chinook --no-psqlrc --set n=5 -P format=html > customer-rep.html
+
+// using :'name' variable syntax in .sql file 
+select * from employee where title=:'title';
+
+// support for dynamic sql where identifiers such as table names and field names are parameters 
+// uses :"variable" notation 
+select * from employee where :"field"=:'value';
+
+// see properties about databases on the server 
+\lt+ 
+
+// see sql behind psql commands 
+\set ECHO_HIDDEN true 
+
+// hence below is minimal query for finding out database sizes 
+chinook# select datname, pg_size_pretty(pg_database_size(datname)) from pg_database;
+

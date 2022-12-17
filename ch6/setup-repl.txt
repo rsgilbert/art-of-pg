@@ -1,0 +1,22 @@
+chinook=# \set PROMPT1 '%~%x%# '
+chinook# \x auto
+Expanded display is used automatically.
+chinook# \set ON_ERROR_STOP on
+chinook# \set ON_ERROR_ROLLBACK interactive
+chinook# \pset null '¤'
+Null display is "¤".
+chinook# \pset linestyle 'unicode'
+Line style is unicode.
+chinook# \pset unicode_border_linestyle single
+Unicode border line style is "single".
+chinook# \pset unicode_column_line_style single
+\pset: unknown option: unicode_column_line_style
+chinook# \pset unicode_column_linestyle single
+Unicode column line style is "single".
+chinook# \pset unicode_header_linestyle double
+Unicode header line style is "double".
+chinook# \pset intervalstyle to 'postgres_verbose';
+\pset: unknown option: intervalstyle
+chinook# \set intervalstyle to 'postgres_verbose';
+chinook# \setenv LESS '-iMFXSx4R'
+chinook# 
